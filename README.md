@@ -1,14 +1,14 @@
 # 🚀서버 부하 체크 프로젝트
 ### 📖 프로젝트 소개
 
-이 프로젝트는 **서버 부하 모니터링**을 자동화하는 시스템입니다. **Jenkins**를 사용하여 매 1분마다 서버의 **uptime** 정보를 확인하고, 이를 기반으로 서버의 부하 상태를 실시간으로 체크합니다. 부하가 일정 수준을 초과할 경우, **로그 파일**에 해당 부하 정보를 기록하여, 시스템 관리자에게 **서버 상태**를 지속적으로 모니터링할 수 있는 환경을 제공합니다.
+이 프로젝트는 **서버 부하 모니터링**을 자동화하는 시스템입니다. **Jenkins**를 사용하여 매 1분마다 서버의 **uptime** 정보를 확인하고, 이를 기반으로 서버의 부하 상태를 실시간으로 체크합니다. **로그 파일**에 해당 부하 정보를 기록하여, 시스템 관리자에게 **서버 상태**를 지속적으로 모니터링할 수 있는 환경을 제공합니다.
 
 ### 🛠️ 프로젝트 목표
 
 - **Jenkins**와 스크립트를 활용하여 **1분 간격**으로 **크론 규칙**을 이용해 서버 부하를 자동으로 체크.
 - 스크립트 실행을 위해 **실행 권한**과 **sudo 권한**을 부여하여 서버에서의 부하 체크가 원활히 이루어지도록 설정
 - **grep** 명령어를 사용해 **uptime**의 출력에서 부하 값을 추출하고, 이를 기반으로 서버의 현재 상태를 판단.
-- **서버 부하** 정보가 임계값을 초과할 경우, **>>** 연산자를 사용하여 **로그 파일**에 기록
+- **서버 부하** 정보가 정상일 떄와 임계값을 초과할 경우를 구분하여 **로그 파일**에 기록.
 
 ### 📘 개발환경
 ![VirtualBox](https://img.shields.io/badge/VirtualBox-2F61B4?style=for-the-badge&logo=VirtualBox&logoColor=white) <img src="https://img.shields.io/badge/ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white" alt="Ubuntu"> <img src="https://img.shields.io/badge/Jenkins-D24939?style=for-the-badge&logo=jenkins&logoColor=white" alt="Jenkins" />
@@ -16,8 +16,8 @@
 # JenkinsInfra
 ## 1. Jenkins 설치
 현재 실행 환경이 Ubuntu 24.0.2 LTS 이라 가정합니다.
-우선 Jenkins 사이트에 접속하여 실행에 필요한 설치를 진행해줍니다.
-
+우선 Jenkins 사이트에 접속하여 실행에 필요한 설치를 진행하여줍니다.
+다만 JDK-17에 대한 설치가 완료된 상태라면 아래 과정을 생략하여줍니다.
 ```bash
 sudo apt update
 sudo apt install fontconfig openjdk-17-jre
@@ -43,7 +43,11 @@ sudo apt-get install jenkins
 ![image](https://github.com/user-attachments/assets/f93794de-b586-4728-81a6-babd204cc0d6)
 
 해당 password키는 sudo cat 명령어를 통해서 출력하여 복사-붙여넣기를 진행합니다.
-이후 로그인 유저를 만들어주는 과정을 진행한다면 젠킨스를 실행 할 준비가 완료됩니다.
+이후 로그인 유저를 만들어주는 과정을 진행해줍니다.
+
+![image](https://github.com/user-attachments/assets/6950b01d-f5b8-40b4-a85a-f6a98365a405)
+
+해당 화면에서 파이프라인을 선택하고 진행해주며 파이프라인 스크립트에서 아래의 과정을 진행해줍니다.
 
 ## 📜Jenkins 서버 부하 체크 스크립트 자동 실행
 
@@ -53,19 +57,20 @@ sudo apt-get install jenkins
 
 <br>
 1. **Jenkins 사용자로 전환**
-    
+
     ```bash
     sudo su - jenkins
     ```
     
     - Jenkins 설치 후, `jenkins` 사용자 환경으로 진입합니다.
-2. **test.sh 소유권 변경**
+2. **test.sh와 server_uptime.log 소유권 변경**
     
     ```bash
     sudo chown jenkins:jenkins /home/ubuntu/server/test.sh
+    sudo chown jenkins:jenkins /home/ubuntu/server/server_uptime.log
     ```
     
-    - `/home/ubuntu/server/test.sh` 파일의 소유자와 그룹을 `jenkins`로 변경하여 Jenkins가 해당 파일에 접근/실행할 수 있도록 합니다.
+    - `/home/ubuntu/server/test.sh`과 /home/ubuntu/server/server_uptime.log 파일의 소유자와 그룹을 `jenkins`로 변경하여 Jenkins가 해당 파일에 접근/실행할 수 있도록 합니다.
 3. **sudoers 설정**
     
     ```bash
@@ -96,17 +101,17 @@ sudo apt-get install jenkins
         THRESHOLD=5.0
         LOAD=$(uptime | grep -o 'load average: .*' | awk '{print $3}' | tr -d ',')
         
+        # 부하 비교를 정확하게 하기 위해 수정
         if (( $(echo "$LOAD > $THRESHOLD" | bc -l) )); then
-            echo "$(date): High Load Detected - $LOAD" >> $LOG_FILE
-            echo "High Load Alert! Current Load: $LOAD" >> $LOG_FILE
+            echo "$(date): CPU 과부화가 인지되었습니다 - $LOAD" >> $LOG_FILE
         else
-            echo "$(date): Load is normal. Safety! Current Load: $LOAD" >> $LOG_FILE
+            echo "$(date): CPU 과부화 문제가 발견되지 않았습니다.: $LOAD" >> $LOG_FILE
         fi
+
         ```
         
-    - `server_uptime.log` 파일 경로 및 권한도 확인/설정합니다.
 5. **Jenkins 파이프라인 구성**
-    - Jenkins 웹 UI(80포트 접속)에서 새로운 파이프라인을 생성하거나 기존 파이프라인을 수정합니다.
+    - Jenkins 웹 UI(8080포트 접속)에서 새로운 파이프라인을 생성하거나 기존 파이프라인을 수정합니다.
     - 파이프라인 스크립트 예시:
         
         ```groovy
@@ -120,7 +125,7 @@ sudo apt-get install jenkins
                 stage('Check Server Load') {
                     steps {
                         script {
-                            // sudo를 사용하여 test.sh 스크립트 호출
+                            // sudo를 사용하여 test.sh 스크립트 실행
                             sh 'sudo /home/ubuntu/server/test.sh'
                         }
                     }
@@ -135,10 +140,54 @@ sudo apt-get install jenkins
         }
         ```
         
-    - 이 스크립트를 저장하면 매 분마다 `test.sh`를 실행하여 서버 부하를 확인하고, 문제가 있으면 로그를 남기도록 동작합니다.
+    - 이 스크립트를 저장하면 매 분마다 `test.sh`를 실행하여 서버 부하를 확인하고 로그를 남기도록 동작합니다.
 
 
-위 단계를 모두 완료하면 Jenkins 파이프라인이 자동으로 서버 부하 체크 스크립트를 실행하며, CPU 부하가 기준치를 초과할 경우 로그 파일에 기록하고 알림을 보낼 수 있습니다.
+위 단계를 모두 완료하면 Jenkins 파이프라인이 지속적으로 cron값을 기준으로 서버 부하 체크 스크립트를 실행하며, CPU 부하가 기준치를 초과할 경우 로그 파일에 기록하고 필요에 따라 알림을 보낼 수 있습니다.
+
+## 📝 테스트
+지금 빌드를 클릭하여서 파이프라인을 실행합니다.
+<br>
+![image](https://github.com/user-attachments/assets/c9fb52c2-3c1e-4e1e-810a-fd7337427768)
+
+### 변경된 server_uptime.log 를 cat 명령어를 이용해 확인
+
+```bash
+ubuntu@ubuntu:~/server$ stress-ng --cpu 8 --vm 2 --vm-bytes 95% --io 8 --timeout 60s
+stress-ng: info:  [11173] setting to a 1 min, 0 secs run per stressor
+stress-ng: info:  [11173] dispatching hogs: 8 cpu, 2 vm, 8 io
+stress-ng: info:  [11184] io: this is a legacy I/O sync stressor, consider using iomix instead
+stress-ng: info:  [11173] skipped: 0
+stress-ng: info:  [11173] passed: 18: cpu (8) vm (2) io (8)
+stress-ng: info:  [11173] failed: 0
+stress-ng: info:  [11173] metrics untrustworthy: 0
+stress-ng: info:  [11173] successful run completed in 1 min, 0.07 secs
+
+ubuntu@ubuntu:~/server$ cat server_uptime.log
+Mon Mar 17 05:03:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.00
+Mon Mar 17 05:04:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.00
+Mon Mar 17 05:05:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.16
+Mon Mar 17 05:06:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.38
+Mon Mar 17 05:07:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.54
+Mon Mar 17 05:08:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.28
+Mon Mar 17 05:09:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.18
+Mon Mar 17 05:10:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.14
+Mon Mar 17 05:11:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.21
+Mon Mar 17 05:12:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.16
+Mon Mar 17 05:13:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.30
+Mon Mar 17 05:14:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.43
+⚠️
+Mon Mar 17 05:15:01 AM UTC 2025: CPU 과부화가 인지되었습니다 - 9.91
+⚠️
+Mon Mar 17 05:16:01 AM UTC 2025: CPU 과부화가 인지되었습니다 - 5.76
+Mon Mar 17 05:17:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 2.43
+Mon Mar 17 05:18:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.97
+Mon Mar 17 05:19:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.51
+
+```
+
+
+
 
 
 ## 💥Trouble Shooting
@@ -201,51 +250,4 @@ sudo apt-get install jenkins
 이 과정을 통해 권한 문제와 파일 경로/내용 오류를 수정하여 정상적으로 파이프라인을 실행할 수 있었습니다.
 
 
-## 테스트
 
-### test.sh
-
-```bash
-LOG_FILE="/home/유저명/디렉토리명/로그파일명.log"
-# 임계값 5.0으로 셋팅
-THRESHOLD=5.0
-LOAD=$(uptime | grep -o 'load average: .*' | awk '{print $3}' | tr -d ',')
-
-if (( $(echo "$LOAD > $THRESHOLD" | bc -l) )); then
-    echo "$(date): CPU 과부화가 인지되었습니다 - $LOAD" >> $LOG_FILE
-else
-    echo "$(date): CPU 과부화 문제가 발견되지 않았습니다.: $LOAD" >> $LOG_FILE
-fi
-```
-
-```bash
-ubuntu@ubuntu:~/server$ stress-ng --cpu 8 --vm 2 --vm-bytes 95% --io 8 --timeout 60s
-stress-ng: info:  [11173] setting to a 1 min, 0 secs run per stressor
-stress-ng: info:  [11173] dispatching hogs: 8 cpu, 2 vm, 8 io
-stress-ng: info:  [11184] io: this is a legacy I/O sync stressor, consider using iomix instead
-stress-ng: info:  [11173] skipped: 0
-stress-ng: info:  [11173] passed: 18: cpu (8) vm (2) io (8)
-stress-ng: info:  [11173] failed: 0
-stress-ng: info:  [11173] metrics untrustworthy: 0
-stress-ng: info:  [11173] successful run completed in 1 min, 0.07 secs
-
-ubuntu@ubuntu:~/server$ cat server_uptime.log
-Mon Mar 17 05:03:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.00
-Mon Mar 17 05:04:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.00
-Mon Mar 17 05:05:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.16
-Mon Mar 17 05:06:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.38
-Mon Mar 17 05:07:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.54
-Mon Mar 17 05:08:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.28
-Mon Mar 17 05:09:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.18
-Mon Mar 17 05:10:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.14
-Mon Mar 17 05:11:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.21
-Mon Mar 17 05:12:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.16
-Mon Mar 17 05:13:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.30
-Mon Mar 17 05:14:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.43
-Mon Mar 17 05:15:01 AM UTC 2025: CPU 과부화가 인지되었습니다 - 9.91
-Mon Mar 17 05:16:01 AM UTC 2025: CPU 과부화가 인지되었습니다 - 5.76
-Mon Mar 17 05:17:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 2.43
-Mon Mar 17 05:18:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.97
-Mon Mar 17 05:19:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.51
-
-```
