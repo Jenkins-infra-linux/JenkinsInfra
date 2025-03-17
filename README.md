@@ -213,19 +213,26 @@ Mon Mar 17 05:19:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습�
 
 
 
+
+
+
+
+
+
+
+
 ## 4. Trouble Shooting
 
 ➡️ Jenkins에 권한을 부여하고 빌드했을때도 계속해서 **권한문제가 발생하고 Failed**가 뜨며 실패합니다.
 
-![오류메시지](https://github.com/user-attachments/assets/726c048c-1c0a-48b7-90f0-79ab1b62ae48)
+![Image](https://github.com/user-attachments/assets/53ad0ea4-7a9f-4d06-ac4a-8fe574ae4892)
 
 
 
 
 ➡️ Jenkins pipeline script를 확인해보니 sudo 명령어가 제대로 쓰이지 않았음을 확인할 수 있었습니다.
 
-![스크린샷 2025-03-17 143001](https://github.com/user-attachments/assets/986454f2-809c-4e86-a223-00bc77fd98c8)
-
+![Image](https://github.com/user-attachments/assets/a5a1249e-966a-4139-96ef-639d3753700c)
 
 ➡️ **sudo 명령어**를 통해 Jenkins pipeline script 수정 후 빌드했습니다.
 
@@ -237,7 +244,7 @@ Mon Mar 17 05:19:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습�
 
 ➡️ 정상적으로 작동하는것을 확인할 수 있습니다.
 
-![정상실행콘솔](https://github.com/user-attachments/assets/6367eea1-841d-424f-b786-bb8f08301b4f)
+![Image](https://github.com/user-attachments/assets/8758a699-c81b-4d3d-86b6-383c759680fd)
 
 
 
@@ -245,7 +252,7 @@ Mon Mar 17 05:19:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습�
 ➡️ 최종적으로 cat 명령어를 통해 로그 결과를 확인했습니다.
 
 
-![스크린샷 2025-03-17 144400](https://github.com/user-attachments/assets/9966c96c-812f-4063-91b0-7d9eb0241762)
+![Image](https://github.com/user-attachments/assets/f1ea2570-6f34-4940-a775-d91c3cd259f7)
 
 
 --- 
