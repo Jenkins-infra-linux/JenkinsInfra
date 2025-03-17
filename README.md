@@ -11,7 +11,7 @@
 - **서버 부하** 정보가 임계값을 초과할 경우, **>>** 연산자를 사용하여 **로그 파일**에 기록
 
 ### 📘 개발환경
-![VirtualBox](https://img.shields.io/badge/VirtualBox-2F61B4?style=for-the-badge&logo=VirtualBox&logoColor=white)
+![VirtualBox](https://img.shields.io/badge/VirtualBox-2F61B4?style=for-the-badge&logo=VirtualBox&logoColor=white) <img src="https://img.shields.io/badge/ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white" alt="Ubuntu"> <img src="https://img.shields.io/badge/Jenkins-D24939?style=for-the-badge&logo=jenkins&logoColor=white" alt="Jenkins" />
 
 # JenkinsInfra
 ## 1. Jenkins 설치
