@@ -239,7 +239,6 @@ Mon Mar 17 05:19:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습�
 ![스크린샷 2025-03-17 143059](https://github.com/user-attachments/assets/bc96270e-565b-43f4-8bc7-9296e5ae981f)
 
 
-![정상실행](https://github.com/user-attachments/assets/f855742d-187a-4cc8-9d44-ffb7b231c041)
 
 
 ➡️ 정상적으로 작동하는것을 확인할 수 있습니다.
