@@ -74,4 +74,51 @@ Jenkins pipeline script를 확인해보니 sudo 명령어가 제대로 적용되
 cat 명령어를 통해 확인
 ![스크린샷 2025-03-17 144400](https://github.com/user-attachments/assets/9966c96c-812f-4063-91b0-7d9eb0241762)
 
+## 테스트
 
+### test.sh
+
+```bash
+LOG_FILE="/home/유저명/디렉토리명/로그파일명.log"
+# 임계값 5.0으로 셋팅
+THRESHOLD=5.0
+LOAD=$(uptime | grep -o 'load average: .*' | awk '{print $3}' | tr -d ',')
+
+if (( $(echo "$LOAD > $THRESHOLD" | bc -l) )); then
+    echo "$(date): CPU 과부화가 인지되었습니다 - $LOAD" >> $LOG_FILE
+else
+    echo "$(date): CPU 과부화 문제가 발견되지 않았습니다.: $LOAD" >> $LOG_FILE
+fi
+```
+
+```bash
+ubuntu@ubuntu:~/server$ stress-ng --cpu 8 --vm 2 --vm-bytes 95% --io 8 --timeout 60s
+stress-ng: info:  [11173] setting to a 1 min, 0 secs run per stressor
+stress-ng: info:  [11173] dispatching hogs: 8 cpu, 2 vm, 8 io
+stress-ng: info:  [11184] io: this is a legacy I/O sync stressor, consider using iomix instead
+stress-ng: info:  [11173] skipped: 0
+stress-ng: info:  [11173] passed: 18: cpu (8) vm (2) io (8)
+stress-ng: info:  [11173] failed: 0
+stress-ng: info:  [11173] metrics untrustworthy: 0
+stress-ng: info:  [11173] successful run completed in 1 min, 0.07 secs
+
+ubuntu@ubuntu:~/server$ cat server_uptime.log
+Mon Mar 17 05:03:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.00
+Mon Mar 17 05:04:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.00
+Mon Mar 17 05:05:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.16
+Mon Mar 17 05:06:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.38
+Mon Mar 17 05:07:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.54
+Mon Mar 17 05:08:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.28
+Mon Mar 17 05:09:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.18
+Mon Mar 17 05:10:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.14
+Mon Mar 17 05:11:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.21
+Mon Mar 17 05:12:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.16
+Mon Mar 17 05:13:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.30
+Mon Mar 17 05:14:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.43
+Mon Mar 17 05:15:01 AM UTC 2025: CPU 과부화가 인지되었습니다 - 9.91
+Mon Mar 17 05:16:01 AM UTC 2025: CPU 과부화가 인지되었습니다 - 5.76
+Mon Mar 17 05:17:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 2.43
+Mon Mar 17 05:18:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.97
+Mon Mar 17 05:19:01 AM UTC 2025: CPU 과부화 문제가 발견되지 않았습니다.: 0.51
+
+```
