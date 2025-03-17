@@ -78,7 +78,7 @@ sudo apt-get install jenkins
     sudo su - jenkins
     
     - Jenkins 설치 후, `jenkins` 사용자 환경으로 진입합니다.
-    - 
+    
 2. **test.sh와 server_uptime.log 소유권 변경**
     
     ```bash
@@ -87,7 +87,7 @@ sudo apt-get install jenkins
     ```
     
     - `/home/ubuntu/server/test.sh`과 /home/ubuntu/server/server_uptime.log 파일의 소유자와 그룹을 `jenkins`로 변경하여 Jenkins가 해당 파일에 접근/실행할 수 있도록 합니다.
-    - 
+      
 3. **sudoers 설정**
     
     ```bash
@@ -103,7 +103,7 @@ sudo apt-get install jenkins
         ```
         
     - Jenkins 사용자가 sudo 명령을 비밀번호 없이 실행할 수 있도록 허용합니다.
-    - 
+      
 4. **테스트 스크립트 생성**
     
     ```bash
@@ -165,8 +165,12 @@ sudo apt-get install jenkins
 위 단계를 모두 완료하면 Jenkins 파이프라인이 지속적으로 cron값을 기준으로 서버 부하 체크 스크립트를 실행하며, CPU 부하가 기준치를 초과할 경우 로그 파일에 기록하고 필요에 따라 알림을 보낼 수 있습니다.
 
 ## 3. 테스트
-지금 빌드를 클릭하여서 파이프라인을 실행합니다.
 <br>
+
+지금 빌드를 클릭하여서 파이프라인을 실행합니다.
+
+<br>
+
 ![image](https://github.com/user-attachments/assets/c9fb52c2-3c1e-4e1e-810a-fd7337427768)
 
 ### 변경된 server_uptime.log 를 cat 명령어를 이용해 확인
