@@ -43,3 +43,35 @@ sudo apt-get install jenkins
 
 해당 password키는 sudo cat 명령어를 통해서 출력하여 복사-붙여넣기를 진행합니다.
 이후 로그인 유저를 만들어주는 과정을 진행한다면 젠킨스를 실행 할 준비가 완료됩니다.
+
+
+## Trouble Shooting
+
+Jenkins에 권한을 부여하고 빌드했을때도 계속해서 권한문제가 발생하며 Failed가 뜸
+
+![오류메시지](https://github.com/user-attachments/assets/726c048c-1c0a-48b7-90f0-79ab1b62ae48)
+
+
+
+
+Jenkins pipeline script를 확인해보니 sudo 명령어가 제대로 적용되지 않았음
+![스크린샷 2025-03-17 143001](https://github.com/user-attachments/assets/986454f2-809c-4e86-a223-00bc77fd98c8)
+
+
+다시 sudo 명령어를 통해 Jenkins pipeline script 수정 후 빌드
+![스크린샷 2025-03-17 143059](https://github.com/user-attachments/assets/bc96270e-565b-43f4-8bc7-9296e5ae981f)
+
+
+![정상실행](https://github.com/user-attachments/assets/f855742d-187a-4cc8-9d44-ffb7b231c041)
+
+
+정상적으로 작동
+![정상실행콘솔](https://github.com/user-attachments/assets/6367eea1-841d-424f-b786-bb8f08301b4f)
+
+
+
+
+cat 명령어를 통해 확인
+![스크린샷 2025-03-17 144400](https://github.com/user-attachments/assets/9966c96c-812f-4063-91b0-7d9eb0241762)
+
+
